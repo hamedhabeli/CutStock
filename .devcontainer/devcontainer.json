@@ -1,0 +1,18 @@
+{
+  "name": "CutStock Android",
+  "image": "mcr.microsoft.com/devcontainers/java:1-17-bookworm",
+  "postCreateCommand": "bash scripts/bootstrap.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Kotlin.kotlin-language",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "remoteEnv": {
+    "ANDROID_SDK_ROOT": "/home/vscode/android-sdk",
+    "ANDROID_HOME": "/home/vscode/android-sdk"
+  }
+}

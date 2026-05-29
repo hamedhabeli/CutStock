@@ -1,0 +1,15 @@
+-keep class com.example.cutstock.nativecore.CuttingPlan { *; }
+-keep class com.example.cutstock.nativecore.Bin { *; }
+-keep class com.example.cutstock.nativecore.NativeSolver { *; }
+-keep class com.example.cutstock.data.ProjectEntity { *; }
+-keep class com.example.cutstock.data.DemandEntity { *; }
+-keep class com.example.cutstock.data.ProjectWithDemands { *; }
+-keep class com.example.cutstock.data.CuttingPlanConverters { *; }
+-keep class com.example.cutstock.data.IntListConverters { *; }
+-keep class com.example.cutstock.presentation.ProjectUiState { *; }
+-keep class com.example.cutstock.domain.SalesSummary { *; }
+-keep class com.example.cutstock.presentation.ProjectViewModel { *; }
+-keep class com.example.cutstock.presentation.MainActivity { *; }
+-keep class com.example.cutstock.presentation.ProjectListActivity { *; }
+-keepattributes *Annotation*
+-dontwarn com.google.gson.**

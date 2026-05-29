@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">کات‌استاک</string>
+
+    <string name="projects_title">پروژه‌ها</string>
+    <string name="new_project">پروژه جدید</string>
+    <string name="empty_projects">هنوز پروژه‌ای ندارید.\nبرای شروع، پروژه جدید بسازید.</string>
+    <string name="delete_project">حذف</string>
+    <string name="delete_project_confirm">آیا از حذف «%1$s» مطمئن هستید؟</string>
+    <string name="project_meta_format">طول میلگرد: %1$d mm | انواع تقاضا: %2$d | %3$s</string>
+    <string name="project_updated_format">آخرین تغییر: %1$s</string>
+    <string name="plan_ready">برنامه آماده</string>
+    <string name="plan_missing">بدون برنامه</string>
+
+    <string name="project_editor_title">ویرایش پروژه</string>
+    <string name="bulk_input_hint">4000 150\n3200 80</string>
+    <string name="bulk_input_label">ورودی تقاضا (طول و تعداد در هر خط)</string>
+    <string name="solve_button">حل برش</string>
+    <string name="settings">تنظیمات پروژه</string>
+    <string name="project_name">نام پروژه</string>
+    <string name="stock_length_mm">طول میلگرد (میلی‌متر)</string>
+    <string name="kerf_mm">ضخامت برش / kerf (میلی‌متر)</string>
+    <string name="diameter_mm">قطر میلگرد (میلی‌متر)</string>
+    <string name="price_per_kg">قیمت هر کیلوگرم (تومان)</string>
+    <string name="stock_lengths_label">طول‌های میلگرد موجود (هر خط یک عدد به mm)</string>
+    <string name="stock_lengths_hint">12000\n6000</string>
+    <string name="approximate_result_hint">نتیجه بهینه‌سازی تقریبی است.</string>
+    <string name="save">ذخیره</string>
+    <string name="cancel">انصراف</string>
+
+    <string name="summary_title">خلاصه نتایج</string>
+    <string name="demands_count_label">انواع تقاضا: %1$d</string>
+    <string name="total_pieces_format">تعداد کل قطعات: %1$d</string>
+    <string name="bars_needed_format">میلگرد موردنیاز: %1$d</string>
+    <string name="waste_percent_format">درصد ضایعات: %1$s</string>
+    <string name="money_saved_format">صرفه‌جویی تخمینی: %1$s</string>
+    <string name="naive_waste_format">%1$s: %2$s</string>
+    <string name="avg_utilization_format">%1$s: %2$s</string>
+    <string name="total_pieces_label">تعداد کل قطعات</string>
+    <string name="bars_needed_label">میلگرد موردنیاز</string>
+    <string name="waste_percent_label">درصد ضایعات</string>
+    <string name="money_saved_label">صرفه‌جویی تخمینی</string>
+    <string name="naive_waste_label">ضایعات روش ساده</string>
+    <string name="actual_waste_label">ضایعات بهینه</string>
+    <string name="saved_waste_label">صرفه‌جویی وزن</string>
+    <string name="no_plan_yet">هنوز برنامه‌ای محاسبه نشده است.</string>
+    <string name="plan_loaded">برنامه برش ذخیره و آماده نمایش است.</string>
+
+    <string name="cutting_plan_title">برنامه برش</string>
+    <string name="bin_title_format">میلگرد %1$d</string>
+    <string name="bin_meta_format">طول %1$d mm | استفاده: %2$d | ضایعات: %3$d mm</string>
+
+    <string name="advanced_report_title">گزارش پیشرفته</string>
+    <string name="advanced_report_locked">گزارش پیشرفته فقط در نسخه حرفه‌ای در دسترس است.</string>
+    <string name="avg_utilization_label">میانگین بهره‌وری</string>
+    <string name="largest_waste_label">بیشترین ضایعات</string>
+    <string name="smallest_waste_label">کمترین ضایعات</string>
+
+    <string name="menu_help">راهنما</string>
+    <string name="menu_about">درباره</string>
+    <string name="menu_upgrade">ارتقا به نسخه حرفه‌ای</string>
+    <string name="menu_export_pdf">خروجی PDF</string>
+    <string name="menu_export_backup">پشتیبان‌گیری</string>
+    <string name="menu_import_backup">بازیابی پشتیبان</string>
+
+    <string name="help_message">هر خط را به شکل «4000 150» وارد کنید (طول به میلی‌متر و تعداد). خط‌های نامعتبر نادیده گرفته می‌شوند.</string>
+    <string name="about_message">CutStock برای بهینه‌سازی برش میلگرد به‌صورت آفلاین و سریع طراحی شده است.</string>
+    <string name="upgrade_title">ارتقا به نسخه حرفه‌ای</string>
+    <string name="upgrade_features">• پروژه‌های نامحدود\n• گزارش‌های پیشرفته\n• خروجی PDF\n• پشتیبان‌گیری و بازیابی</string>
+    <string name="purchase_button">خرید (۳۹۰,۰۰۰ تومان)</string>
+    <string name="purchase_coming_soon">به زودی به کافه‌بازار متصل می‌شود</string>
+
+    <string name="free_tier_hint">نسخه رایگان: حداکثر %1$d پروژه و %2$d نوع طول</string>
+    <string name="pro_badge">حرفه‌ای</string>
+
+    <string name="share_pdf_title">اشتراک‌گذاری گزارش PDF</string>
+    <string name="backup_file_name">cutstock-backup.json</string>
+
+    <string name="ok">باشه</string>
+    <string name="delete">حذف</string>
+    <string name="debug_pro_toggle">فعال‌سازی نسخه حرفه‌ای (فقط دیباگ)</string>
+    <string name="settings_invalid">نام پروژه یا طول‌های stock نامعتبر است.</string>
+</resources>

@@ -9,7 +9,7 @@ import java.io.InputStream
 import java.io.OutputStream
 
 data class ProjectBackup(
-    val version: Int = BACKUP_VERSION,
+    val version: Int = ProjectBackupManager.BACKUP_VERSION,
     val name: String,
     val stockLengthMm: Int,
     val kerfMm: Int = 3,

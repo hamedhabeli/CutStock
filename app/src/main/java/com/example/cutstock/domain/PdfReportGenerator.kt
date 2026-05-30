@@ -127,7 +127,7 @@ class PdfReportGenerator(private val context: Context) {
             textSize = 22f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         }
-        return drawRtlBlock(canvas, x, y, PAGE_WIDTH_PT - MARGIN_PT * 2, title, paint) + 8f
+        return drawRtlBlock(canvas, x, y, (PAGE_WIDTH_PT - MARGIN_PT * 2).toFloat(), title, paint) + 8f
     }
 
     private fun drawSectionTitle(canvas: Canvas, x: Float, y: Float, title: String): Float {
@@ -135,7 +135,7 @@ class PdfReportGenerator(private val context: Context) {
             textSize = 16f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         }
-        return drawRtlBlock(canvas, x, y, PAGE_WIDTH_PT - MARGIN_PT * 2, title, paint) + 6f
+        return drawRtlBlock(canvas, x, y, (PAGE_WIDTH_PT - MARGIN_PT * 2).toFloat(), title, paint) + 6f
     }
 
     private fun drawLine(canvas: Canvas, x: Float, y: Float, maxX: Float, text: String): Float {
@@ -143,9 +143,9 @@ class PdfReportGenerator(private val context: Context) {
         return drawRtlBlock(canvas, x, y, maxX - x, text, paint)
     }
 
-    private fun drawRtlBlock(canvas: Canvas, x: Float, y: Float, width: Int, text: String, paint: TextPaint): Float {
+    private fun drawRtlBlock(canvas: Canvas, x: Float, y: Float, width: Float, text: String, paint: TextPaint): Float {
         val layout = StaticLayout.Builder
-            .obtain(text, 0, text.length, paint, width)
+            .obtain(text, 0, text.length, paint, width.toInt())
             .setAlignment(Layout.Alignment.ALIGN_NORMAL)
             .setTextDirection(android.text.TextDirectionHeuristics.RTL)
             .build()

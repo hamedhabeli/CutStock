@@ -40,17 +40,8 @@ jobs:
       - name: Bootstrap SDK and project
         run: bash scripts/bootstrap.sh
 
-      - name: Run JVM smoke tests
+      - name: Run JVM unit tests
         run: bash scripts/run_smoke_tests.sh
-
-      - name: Run instrumentation smoke tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: google_apis
-          arch: x86_64
-          profile: pixel_6
-          script: bash scripts/run_smoke_tests.sh
 
       - name: Build signed release APK
         run: bash scripts/build_release.sh

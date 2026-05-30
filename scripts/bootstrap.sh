@@ -22,7 +22,7 @@ fi
 
 export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
 
-yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses >/dev/null
+(yes 2>/dev/null || true) | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses >/dev/null
 sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
   "platform-tools" \
   "platforms;android-34" \

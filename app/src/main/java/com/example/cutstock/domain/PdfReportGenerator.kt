@@ -31,6 +31,7 @@ class PdfReportGenerator(private val context: Context) {
         val pageWidth = PAGE_WIDTH_PT
         val pageHeight = PAGE_HEIGHT_PT
         val margin = MARGIN_PT
+        val rightEdge = (pageWidth - margin).toFloat()   // ← Float یک‌بار محاسبه می‌شود
 
         var pageNumber = 1
         var y = margin.toFloat()
@@ -56,18 +57,18 @@ class PdfReportGenerator(private val context: Context) {
             canvas,
             margin.toFloat(),
             y,
-            pageWidth - margin,
+            rightEdge,
             "طول‌های stock: ${settings.stockLengthsMm.joinToString(", ")} mm"
         )
-        y = drawLine(canvas, margin.toFloat(), y, pageWidth - margin, "kerf: ${settings.kerfMm} mm")
-        y = drawLine(canvas, margin.toFloat(), y, pageWidth - margin, "قطر: ${settings.diameterMm} mm")
-        y = drawLine(canvas, margin.toFloat(), y, pageWidth - margin, "تعداد میلگرد: ${sales.barsNeeded}")
-        y = drawLine(canvas, margin.toFloat(), y, pageWidth - margin, "درصد ضایعات: ${formatPercent(sales.wastePercent)}")
+        y = drawLine(canvas, margin.toFloat(), y, rightEdge, "kerf: ${settings.kerfMm} mm")
+        y = drawLine(canvas, margin.toFloat(), y, rightEdge, "قطر: ${settings.diameterMm} mm")
+        y = drawLine(canvas, margin.toFloat(), y, rightEdge, "تعداد میلگرد: ${sales.barsNeeded}")
+        y = drawLine(canvas, margin.toFloat(), y, rightEdge, "درصد ضایعات: ${formatPercent(sales.wastePercent)}")
         y = drawLine(
             canvas,
             margin.toFloat(),
             y,
-            pageWidth - margin,
+            rightEdge,
             "صرفه‌جویی: ${decimalFormat.format(sales.moneySavedTomans)} تومان"
         )
         y += SECTION_GAP
@@ -79,7 +80,7 @@ class PdfReportGenerator(private val context: Context) {
                 canvas,
                 margin.toFloat(),
                 y,
-                pageWidth - margin,
+                rightEdge,
                 "${demand.lengthMm} میلی‌متر × ${demand.quantity}"
             )
         }
@@ -90,14 +91,14 @@ class PdfReportGenerator(private val context: Context) {
             canvas,
             margin.toFloat(),
             y,
-            pageWidth - margin,
+            rightEdge,
             "میانگین بهره‌وری: ${formatPercent(sales.averageUtilizationPercent)}"
         )
-        y = drawLine(canvas, margin.toFloat(), y, pageWidth - margin, "بیشترین ضایعات: ${sales.largestWasteMm} میلی‌متر")
-        y = drawLine(canvas, margin.toFloat(), y, pageWidth - margin, "کمترین ضایعات: ${sales.smallestWasteMm} میلی‌متر")
-        y = drawLine(canvas, margin.toFloat(), y, pageWidth - margin, "ضایعات ساده: ${formatKg(sales.naiveWasteKg)}")
-        y = drawLine(canvas, margin.toFloat(), y, pageWidth - margin, "ضایعات واقعی: ${formatKg(sales.actualWasteKg)}")
-        y = drawLine(canvas, margin.toFloat(), y, pageWidth - margin, "صرفه‌جویی وزن: ${formatKg(sales.savedWasteKg)}")
+        y = drawLine(canvas, margin.toFloat(), y, rightEdge, "بیشترین ضایعات: ${sales.largestWasteMm} میلی‌متر")
+        y = drawLine(canvas, margin.toFloat(), y, rightEdge, "کمترین ضایعات: ${sales.smallestWasteMm} میلی‌متر")
+        y = drawLine(canvas, margin.toFloat(), y, rightEdge, "ضایعات ساده: ${formatKg(sales.naiveWasteKg)}")
+        y = drawLine(canvas, margin.toFloat(), y, rightEdge, "ضایعات واقعی: ${formatKg(sales.actualWasteKg)}")
+        y = drawLine(canvas, margin.toFloat(), y, rightEdge, "صرفه‌جویی وزن: ${formatKg(sales.savedWasteKg)}")
         y += SECTION_GAP
 
         y = drawSectionTitle(canvas, margin.toFloat(), y, "برنامه برش")
@@ -108,7 +109,7 @@ class PdfReportGenerator(private val context: Context) {
                 canvas,
                 margin.toFloat(),
                 y,
-                pageWidth - margin,
+                rightEdge,
                 "میلگرد ${index + 1} (${bin.stockLengthMm}mm): $pieces | استفاده ${bin.usedMm} | ضایعات ${bin.wasteMm}"
             )
         }
@@ -127,7 +128,7 @@ class PdfReportGenerator(private val context: Context) {
             textSize = 22f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         }
-        return drawRtlBlock(canvas, x, y, PAGE_WIDTH_PT - MARGIN_PT * 2, title, paint) + 8f
+        return drawRtlBlock(canvas, x, y, (PAGE_WIDTH_PT - MARGIN_PT * 2).toFloat(), title, paint) + 8f
     }
 
     private fun drawSectionTitle(canvas: Canvas, x: Float, y: Float, title: String): Float {
@@ -135,7 +136,7 @@ class PdfReportGenerator(private val context: Context) {
             textSize = 16f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         }
-        return drawRtlBlock(canvas, x, y, PAGE_WIDTH_PT - MARGIN_PT * 2, title, paint) + 6f
+        return drawRtlBlock(canvas, x, y, (PAGE_WIDTH_PT - MARGIN_PT * 2).toFloat(), title, paint) + 6f
     }
 
     private fun drawLine(canvas: Canvas, x: Float, y: Float, maxX: Float, text: String): Float {
@@ -143,9 +144,10 @@ class PdfReportGenerator(private val context: Context) {
         return drawRtlBlock(canvas, x, y, maxX - x, text, paint)
     }
 
-    private fun drawRtlBlock(canvas: Canvas, x: Float, y: Float, width: Int, text: String, paint: TextPaint): Float {
+    // width: Float (نه Int) تا همه callerها بدون cast کار کنند
+    private fun drawRtlBlock(canvas: Canvas, x: Float, y: Float, width: Float, text: String, paint: TextPaint): Float {
         val layout = StaticLayout.Builder
-            .obtain(text, 0, text.length, paint, width)
+            .obtain(text, 0, text.length, paint, width.toInt())
             .setAlignment(Layout.Alignment.ALIGN_NORMAL)
             .setTextDirection(android.text.TextDirectionHeuristics.RTL)
             .build()

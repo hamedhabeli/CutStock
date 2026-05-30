@@ -231,7 +231,7 @@ bool is_better_solution(const std::vector<Bin>& a, const std::vector<Bin>& b) {
 
 std::vector<Bin> refine_shorter_stocks(
     std::vector<Bin> bins,
-    const std::vector<int>& stockLengths,
+    std::vector<int> stockLengths,
     int kerfMm,
     std::chrono::steady_clock::time_point deadline
 ) {

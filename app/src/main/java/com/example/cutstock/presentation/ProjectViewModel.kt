@@ -120,13 +120,22 @@ class ProjectViewModel(
         }
 
         viewModelScope.launch {
-            val parsedDemands = withContext(Dispatchers.Default) {
+            val parseResult = withContext(Dispatchers.Default) {
                 BulkInputParser.parse(rawBulkInput)
             }
+            val parsedDemands = parseResult.demands
 
             if (parsedDemands.isEmpty()) {
                 _uiState.value = ProjectUiState.Error("هیچ خط معتبری یافت نشد.")
                 return@launch
+            }
+
+            if (parseResult.ignoredLines > 0) {
+                _events.emit(
+                    ProjectEvent.ShowMessage(
+                        "${parseResult.ignoredLines} خط نامعتبر نادیده گرفته شد."
+                    )
+                )
             }
 
             val isPro = userPreferences.isPro.first()

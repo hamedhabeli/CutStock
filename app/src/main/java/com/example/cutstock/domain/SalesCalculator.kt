@@ -15,34 +15,33 @@ data class SalesSummary(
     val moneySavedTomans: Long,
     val averageUtilizationPercent: Double,
     val largestWasteMm: Int,
-    val smallestWasteMm: Int
+    val smallestWasteMm: Int,
 )
 
 object SalesCalculator {
     fun calculate(
         plan: CuttingPlan,
         project: ProjectEntity,
-        demands: List<DemandInput>
+        demands: List<DemandInput>,
     ): SalesSummary {
         val barsNeeded = plan.binCount.coerceAtLeast(0)
         val wastePercent = plan.wastePercentBasisPoints / 100.0
-
         val primaryStock = project.stockLengthsMm.maxOrNull() ?: project.stockLengthMm
+
         val naiveWasteMm = NaiveCuttingEstimator.estimateTotalWasteMm(
             demands = demands,
             stockLengthMm = primaryStock,
-            kerfMm = project.kerfMm
+            kerfMm = project.kerfMm,
         )
-
         val naiveWasteKg = SteelWeightCalculator.weightKg(
             lengthMm = naiveWasteMm,
             diameterMm = project.diameterMm,
-            densityKgM3 = project.steelDensityKgM3
+            densityKgM3 = project.steelDensityKgM3,
         )
         val actualWasteKg = SteelWeightCalculator.weightKg(
             lengthMm = plan.totalWasteMm,
             diameterMm = project.diameterMm,
-            densityKgM3 = project.steelDensityKgM3
+            densityKgM3 = project.steelDensityKgM3,
         )
         val savedWasteKg = max(0.0, naiveWasteKg - actualWasteKg)
         val moneySavedTomans = (savedWasteKg * project.pricePerKgTomans).roundToLong()
@@ -66,7 +65,7 @@ object SalesCalculator {
             moneySavedTomans = moneySavedTomans,
             averageUtilizationPercent = averageUtilizationPercent,
             largestWasteMm = wasteValues.maxOrNull() ?: 0,
-            smallestWasteMm = wasteValues.minOrNull() ?: 0
+            smallestWasteMm = wasteValues.minOrNull() ?: 0,
         )
     }
 }

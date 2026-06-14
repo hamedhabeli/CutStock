@@ -8,6 +8,7 @@ class BulkInputParserTest {
 
     @Test
     fun parse_validLines_mergesDuplicateLengths() {
+        // parse() now returns ParseResult; extract the demands list via .demands
         val result = BulkInputParser.parse(
             """
             4000 150
@@ -16,7 +17,7 @@ class BulkInputParserTest {
             invalid
             1000
             """.trimIndent()
-        )
+        ).demands
         assertEquals(2, result.size)
         assertEquals(4000, result[0].lengthMm)
         assertEquals(200, result[0].quantity)
@@ -26,7 +27,7 @@ class BulkInputParserTest {
 
     @Test
     fun parse_empty_returnsEmpty() {
-        assertTrue(BulkInputParser.parse("").isEmpty())
+        assertTrue(BulkInputParser.parse("").demands.isEmpty())
     }
 
     @Test
@@ -36,7 +37,8 @@ class BulkInputParserTest {
             com.example.cutstock.data.DemandInput(2000, 5)
         )
         val formatted = BulkInputParser.format(demands)
-        val parsed = BulkInputParser.parse(formatted)
+        // parse() returns ParseResult; compare only the demands list
+        val parsed = BulkInputParser.parse(formatted).demands
         assertEquals(demands, parsed)
     }
 }

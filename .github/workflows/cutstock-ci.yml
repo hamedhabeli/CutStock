@@ -52,7 +52,7 @@ jobs:
           name: cutstock-release
           path: |
             app/build/outputs/apk/bazaar/release/app-bazaar-release-signed.apk
-            app/build/outputs/mapping/release/mapping.txt
-            app/build/outputs/native-debug-symbols/release/native-debug-symbols.zip
+            app/build/outputs/mapping/bazaarRelease/mapping.txt
+            app/build/outputs/native-debug-symbols/bazaarRelease/native-debug-symbols.zip
             app/keystore-info.txt
           if-no-files-found: warn

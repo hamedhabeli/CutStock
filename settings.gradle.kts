@@ -11,8 +11,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://maven.cafebazaar.ir") }
-        maven { url = uri("https://cafebazaar.github.io/Poolakey/") }
         maven { url = uri("https://jitpack.io") }
     }
 }

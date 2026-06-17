@@ -9,11 +9,11 @@ export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platfo
 
 cd "$ROOT_DIR"
 
-./scripts/gradle.sh clean :app:assembleRelease
+./scripts/gradle.sh clean :app:assembleBazaarRelease
 
-UNSIGNED_APK="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*unsigned*.apk' | sort | tail -n1 || true)"
+UNSIGNED_APK="$(find app/build/outputs/apk/bazaar/release -maxdepth 1 -type f -name '*unsigned*.apk' | sort | tail -n1 || true)"
 if [[ -z "${UNSIGNED_APK:-}" || ! -f "$UNSIGNED_APK" ]]; then
-  UNSIGNED_APK="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' | sort | tail -n1)"
+  UNSIGNED_APK="$(find app/build/outputs/apk/bazaar/release -maxdepth 1 -type f -name '*.apk' | sort | tail -n1)"
 fi
 
 if [[ ! -f "$UNSIGNED_APK" ]]; then
@@ -43,7 +43,7 @@ echo "keyPassword=$KEY_PASSWORD" >> app/keystore-info.txt
 echo "keystore=$KEYSTORE_PATH" >> app/keystore-info.txt
 
 ALIGNED_APK="$ROOT_DIR/app-release-aligned.apk"
-SIGNED_APK="$ROOT_DIR/app/build/outputs/apk/release/app-release-signed.apk"
+SIGNED_APK="$ROOT_DIR/app/build/outputs/apk/bazaar/release/app-bazaar-release-signed.apk"
 
 "$ZIPALIGN" -p 4 "$UNSIGNED_APK" "$ALIGNED_APK"
 "$APKSIGNER" sign   --ks "$KEYSTORE_PATH"   --ks-key-alias "$KEY_ALIAS"   --ks-pass pass:"$KEYSTORE_PASSWORD"   --key-pass pass:"$KEY_PASSWORD"   --out "$SIGNED_APK"   "$ALIGNED_APK"

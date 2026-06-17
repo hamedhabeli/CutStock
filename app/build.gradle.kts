@@ -8,8 +8,21 @@ android {
     namespace = "com.example.cutstock"
     compileSdk = 34
 
+    flavorDimensions += "billing"
+    productFlavors {
+        create("mock") {
+            dimension = "billing"
+            applicationIdSuffix = ".mock"
+            versionNameSuffix = "-mock"
+        }
+        create("bazaar") {
+            dimension = "billing"
+            // applicationId = "ir.cutmize.app" (set in defaultConfig)
+        }
+    }
+
     defaultConfig {
-        applicationId = "ir.cutstock.app"
+        applicationId = "ir.cutmize.app"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -78,6 +91,7 @@ android {
 }
 
 dependencies {
+    "bazaarImplementation"("ir.cafebazaar.poolakey:poolakey:2.2.0")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")

@@ -3,19 +3,28 @@ package com.example.cutstock
 import android.app.Application
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
-import com.example.cutstock.BuildConfig
+import com.example.cutstock.billing.BillingProviderImpl
 import com.example.cutstock.data.AppDatabase
 import com.example.cutstock.data.ProjectRepository
 import com.example.cutstock.data.UserPreferences
 import com.example.cutstock.domain.ProjectBackupManager
 import com.example.cutstock.domain.PdfReportGenerator
 import com.example.cutstock.domain.billing.BillingManager
-import com.example.cutstock.domain.billing.DebugBillingManager
-import com.example.cutstock.domain.billing.StubBillingManager
 import com.example.cutstock.presentation.AppContainer
 import com.example.cutstock.presentation.ProjectListViewModel
 import com.example.cutstock.presentation.ProjectViewModel
+
 class CutStockApplication : Application(), AppContainer {
+
+    companion object {
+        lateinit var instance: CutStockApplication
+            private set
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        instance = this
+    }
 
     private val database by lazy {
         Room.databaseBuilder(this, AppDatabase::class.java, "cutstock.db")
@@ -40,11 +49,7 @@ class CutStockApplication : Application(), AppContainer {
     }
 
     override val billingManager: BillingManager by lazy {
-        if (BuildConfig.DEBUG) {
-            DebugBillingManager(userPreferences)
-        } else {
-            StubBillingManager(userPreferences)
-        }
+        BillingProviderImpl().create(userPreferences)
     }
 
     override fun projectViewModelFactory(): ViewModelProvider.Factory =

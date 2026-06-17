@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-./scripts/gradle.sh testDebugUnitTest
+./scripts/gradle.sh testMockDebugUnitTest testBazaarDebugUnitTest
 
 if command -v adb >/dev/null 2>&1; then
   if adb devices | awk 'NR>1 && $2=="device" {found=1} END {exit !found}'; then

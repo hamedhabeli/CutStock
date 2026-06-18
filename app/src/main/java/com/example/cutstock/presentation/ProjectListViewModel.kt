@@ -60,19 +60,21 @@ class ProjectListViewModel(
 
     init {
         viewModelScope.launch {
-            combine(repository.observeProjects(), userPreferences.isPro) { projects, isPro ->
-                val items = withContext(Dispatchers.IO) {
-                    projects.map { project ->
-                        val demandCount = repository.getProjectSnapshot(project.id)?.demands?.size ?: 0
-                        ProjectListItem(
-                            id = project.id,
-                            name = project.name,
-                            stockLengthMm = project.stockLengthMm,
-                            demandCount = demandCount,
-                            hasPlan = project.cuttingPlan != null,
-                            updatedAtMillis = project.updatedAtMillis
-                        )
-                    }
+            combine(
+                repository.observeProjects(),
+                repository.observeDemandCountsMap(),
+                userPreferences.isPro
+            ) { projects, demandCounts, isPro ->
+                val countsMap = demandCounts.associate { it.projectId to it.demandCount }
+                val items = projects.map { project ->
+                    ProjectListItem(
+                        id = project.id,
+                        name = project.name,
+                        stockLengthMm = project.stockLengthMm,
+                        demandCount = countsMap[project.id] ?: 0,
+                        hasPlan = project.cuttingPlan != null,
+                        updatedAtMillis = project.updatedAtMillis
+                    )
                 }
                 ProjectListUiState.Success(items, isPro)
             }.collect { state ->
@@ -85,20 +87,6 @@ class ProjectListViewModel(
         viewModelScope.launch {
             _isCreating.value = true
             try {
-                val isPro = userPreferences.isPro.first()
-                if (!isPro) {
-                    val count = repository.countProjects()
-                    if (count >= FreemiumPolicy.FREE_MAX_PROJECTS) {
-                        _events.emit(ProjectListEvent.ShowUpgrade)
-                        _events.emit(
-                            ProjectListEvent.ShowMessage(
-                                "در نسخه رایگان حداکثر ${FreemiumPolicy.FREE_MAX_PROJECTS} پروژه مجاز است."
-                            )
-                        )
-                        return@launch
-                    }
-                }
-
                 val defaults = userPreferences.workshopDefaults.first()
                 val projectId = repository.createProject(defaultName, defaults)
                 _events.emit(ProjectListEvent.OpenProject(projectId))

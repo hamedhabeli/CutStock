@@ -44,7 +44,8 @@ sealed interface ProjectUiState {
         val bulkInputText: String,
         val cuttingPlan: CuttingPlan?,
         val sales: SalesSummary?,
-        val isPro: Boolean
+        val isPro: Boolean,
+        val isPlanStale: Boolean
     ) : ProjectUiState
 
     data class Error(val message: String) : ProjectUiState
@@ -72,9 +73,11 @@ class ProjectViewModel(
 
     private var currentProjectId: Long? = null
     private var observeJob: kotlinx.coroutines.Job? = null
+    private var isPlanStale = false
 
     fun bindProject(projectId: Long) {
         currentProjectId = projectId
+        isPlanStale = false
         observeJob?.cancel()
         observeJob = viewModelScope.launch {
             repository.observeProjectWithDemands(projectId).collectLatest { snapshot ->
@@ -95,7 +98,9 @@ class ProjectViewModel(
                     stockLengthsMm = project.stockLengthsMm
                 )
                 val sales = snapshot.project.cuttingPlan?.let { plan ->
-                    SalesCalculator.calculate(plan, project, demands)
+                    withContext(Dispatchers.Default) {
+                        SalesCalculator.calculate(plan, project, demands)
+                    }
                 }
 
                 _uiState.value = ProjectUiState.Success(
@@ -107,7 +112,8 @@ class ProjectViewModel(
                     bulkInputText = BulkInputParser.format(demands),
                     cuttingPlan = snapshot.project.cuttingPlan,
                     sales = sales,
-                    isPro = isPro
+                    isPro = isPro,
+                    isPlanStale = isPlanStale
                 )
             }
         }
@@ -139,11 +145,12 @@ class ProjectViewModel(
             }
 
             val isPro = userPreferences.isPro.first()
-            if (!isPro && parsedDemands.size > FreemiumPolicy.FREE_MAX_DEMAND_TYPES) {
+            val solveCount = userPreferences.solveCount.first()
+            if (!isPro && solveCount >= FreemiumPolicy.FREE_MAX_SOLVES) {
                 _events.emit(ProjectEvent.ShowUpgrade)
                 _events.emit(
                     ProjectEvent.ShowMessage(
-                        "در نسخه رایگان حداکثر ${FreemiumPolicy.FREE_MAX_DEMAND_TYPES} نوع طول مجاز است."
+                        "${FreemiumPolicy.FREE_MAX_SOLVES} بار حل برش رایگان استفاده شد. برای ادامه ارتقا دهید."
                     )
                 )
                 return@launch
@@ -157,6 +164,10 @@ class ProjectViewModel(
                 }
                 withContext(Dispatchers.IO) {
                     repository.solveProject(projectId)
+                }
+                isPlanStale = false
+                if (!isPro) {
+                    userPreferences.incrementSolveCount()
                 }
             } catch (t: Throwable) {
                 _uiState.value = ProjectUiState.Error(t.message ?: "حل برش ناموفق بود.")
@@ -172,7 +183,8 @@ class ProjectViewModel(
                 withContext(Dispatchers.IO) {
                     repository.updateProjectSettings(projectId, settings)
                 }
-                _events.emit(ProjectEvent.ShowMessage("تنظیمات ذخیره شد."))
+                isPlanStale = true
+                _events.emit(ProjectEvent.ShowMessage("تنظیمات ذخیره شد. برای به‌روزرسانی نتیجه، «حل برش» را دوباره اجرا کنید."))
             } catch (t: Throwable) {
                 _events.emit(ProjectEvent.ShowMessage(t.message ?: "ذخیره تنظیمات ناموفق بود."))
             }

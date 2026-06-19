@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [ProjectEntity::class, DemandEntity::class],
     version = 3,
-    exportSchema = true
+    exportSchema = false
 )
 @TypeConverters(CuttingPlanConverters::class, IntListConverters::class)
 abstract class AppDatabase : RoomDatabase() {

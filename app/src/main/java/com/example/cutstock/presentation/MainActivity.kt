@@ -45,12 +45,12 @@ class MainActivity : AppCompatActivity() {
 
     private val cuttingPlanAdapter = CuttingPlanAdapter()
 
-    private val demandTableAdapter = DemandTableAdapter { demands ->
+    private val demandTableAdapter = DemandTableAdapter(onChanged = { demands ->
         val formattedText = BulkInputParser.format(demands)
         if (binding.bulkInputEditText.text?.toString() != formattedText) {
             binding.bulkInputEditText.setText(formattedText)
         }
-    }
+    })
 
     private val container by lazy { application as CutStockApplication }
 

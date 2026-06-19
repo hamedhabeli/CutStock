@@ -15,8 +15,8 @@ data class DemandRow(
 )
 
 class DemandTableAdapter(
-    private var rows: MutableList<DemandRow> = mutableListOf(),
-    private val onChanged: (List<DemandInput>) -> Unit
+    private val onChanged: (List<DemandInput>) -> Unit,
+    private var rows: MutableList<DemandRow> = mutableListOf()
 ) : RecyclerView.Adapter<DemandTableAdapter.ViewHolder>() {
 
     fun updateData(newDemands: List<DemandInput>) {

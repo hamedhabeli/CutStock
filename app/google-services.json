@@ -2,7 +2,8 @@
   "REPLACE_WITH_REAL": "REPLACE with real google-services.json from Firebase Console before release",
   "project_info": {
     "project_number": "123456789012",
-    "project_id": "cutmize-app"
+    "project_id": "cutmize-app",
+    "storage_bucket": "cutmize-app.appspot.com"
   },
   "client": [
     {
@@ -11,7 +12,14 @@
         "android_client_info": {
           "package_name": "ir.cutmize.app"
         }
-      }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDummyKeyHere-abcdefghijklmnopqrst"
+        }
+      ],
+      "services": {}
     },
     {
       "client_info": {
@@ -19,7 +27,15 @@
         "android_client_info": {
           "package_name": "ir.cutmize.app.mock"
         }
-      }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDummyKeyHere-abcdefghijklmnopqrst"
+        }
+      ],
+      "services": {}
     }
-  ]
+  ],
+  "configuration_version": "1"
 }

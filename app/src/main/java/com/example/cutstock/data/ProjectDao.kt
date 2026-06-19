@@ -54,4 +54,12 @@ interface ProjectDao {
     @Transaction
     @Query("SELECT * FROM projects WHERE id = :projectId LIMIT 1")
     fun observeProjectWithDemands(projectId: Long): Flow<ProjectWithDemands?>
+
+    @Query("SELECT projectId, COUNT(*) as demandCount FROM demands GROUP BY projectId")
+    fun observeDemandCountsMap(): Flow<List<DemandCountRow>>
 }
+
+data class DemandCountRow(
+    val projectId: Long,
+    val demandCount: Int
+)

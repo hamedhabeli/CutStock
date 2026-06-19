@@ -23,7 +23,7 @@ import kotlinx.coroutines.withContext
 data class ProjectListItem(
     val id: Long,
     val name: String,
-    val stockLengthMm: Int,
+    val maxStockLengthMm: Int,
     val demandCount: Int,
     val hasPlan: Boolean,
     val updatedAtMillis: Long
@@ -70,7 +70,7 @@ class ProjectListViewModel(
                     ProjectListItem(
                         id = project.id,
                         name = project.name,
-                        stockLengthMm = project.stockLengthMm,
+                        maxStockLengthMm = project.stockLengthsMm.maxOrNull() ?: 12_000,
                         demandCount = countsMap[project.id] ?: 0,
                         hasPlan = project.cuttingPlan != null,
                         updatedAtMillis = project.updatedAtMillis

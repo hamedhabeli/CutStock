@@ -25,10 +25,8 @@ data class WorkshopDefaults(
 class UserPreferences(context: Context) {
     private val dataStore = context.applicationContext.dataStore
 
-    val isPro: Flow<Boolean> = dataStore.data.map { prefs ->
-        prefs[KEY_IS_PRO] ?: false
-    }
-
+    val isPro: Flow<Boolean> = dataStore.data.map { prefs -> prefs[KEY_IS_PRO] ?: false }
+    val solveCount: Flow<Int> = dataStore.data.map { prefs -> prefs[KEY_SOLVE_COUNT] ?: 0 }
     val workshopDefaults: Flow<WorkshopDefaults> = dataStore.data.map { prefs ->
         WorkshopDefaults(
             kerfMm = prefs[KEY_DEFAULT_KERF] ?: 3,
@@ -42,6 +40,18 @@ class UserPreferences(context: Context) {
     suspend fun setPro(enabled: Boolean) {
         dataStore.edit { prefs ->
             prefs[KEY_IS_PRO] = enabled
+        }
+    }
+
+    suspend fun incrementSolveCount() {
+        dataStore.edit { prefs ->
+            prefs[KEY_SOLVE_COUNT] = (prefs[KEY_SOLVE_COUNT] ?: 0) + 1
+        }
+    }
+
+    suspend fun resetSolveCountForPro() {
+        dataStore.edit { prefs ->
+            prefs[KEY_SOLVE_COUNT] = Int.MAX_VALUE
         }
     }
 
@@ -67,6 +77,7 @@ class UserPreferences(context: Context) {
 
     companion object {
         private val KEY_IS_PRO = booleanPreferencesKey("is_pro")
+        private val KEY_SOLVE_COUNT = intPreferencesKey("solve_count")
         private val KEY_DEFAULT_KERF = intPreferencesKey("default_kerf_mm")
         private val KEY_DEFAULT_DIAMETER = intPreferencesKey("default_diameter_mm")
         private val KEY_DEFAULT_PRICE = longPreferencesKey("default_price_per_kg")

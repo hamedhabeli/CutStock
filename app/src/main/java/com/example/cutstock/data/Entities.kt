@@ -15,7 +15,6 @@ data class ProjectEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
     val name: String,
-    val stockLengthMm: Int = 12_000,
     val kerfMm: Int = 3,
     val diameterMm: Int = 16,
     val pricePerKgTomans: Long = 35_000L,
@@ -64,5 +63,6 @@ data class ProjectSettings(
     val steelDensityKgM3: Double,
     val stockLengthsMm: List<Int>
 ) {
-    val primaryStockLengthMm: Int get() = stockLengthsMm.maxOrNull() ?: 12_000
+    val primaryStockLengthMm: Int
+        get() = stockLengthsMm.maxOrNull() ?: 12_000
 }

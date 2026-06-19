@@ -28,12 +28,11 @@ class ProjectListAdapter(
         private val onOpen: (Long) -> Unit,
         private val onDelete: (Long) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
-
         fun bind(item: ProjectListItem) {
             binding.projectNameTextView.text = item.name
             binding.projectMetaTextView.text = binding.root.context.getString(
                 com.example.cutstock.R.string.project_meta_format,
-                item.stockLengthMm,
+                item.maxStockLengthMm,
                 item.demandCount,
                 if (item.hasPlan) {
                     binding.root.context.getString(com.example.cutstock.R.string.plan_ready)
@@ -46,7 +45,6 @@ class ProjectListAdapter(
                 DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
                     .format(Date(item.updatedAtMillis))
             )
-
             binding.root.setOnClickListener { onOpen(item.id) }
             binding.deleteButton.setOnClickListener { onDelete(item.id) }
         }

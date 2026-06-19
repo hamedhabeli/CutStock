@@ -24,16 +24,18 @@ class ProjectRepository(
     fun observeProjectWithDemands(projectId: Long): Flow<ProjectWithDemands?> =
         dao.observeProjectWithDemands(projectId)
 
+    fun observeDemandCountsMap(): Flow<List<DemandCountRow>> = dao.observeDemandCountsMap()
+
     suspend fun createProject(
         name: String,
         defaults: WorkshopDefaults = WorkshopDefaults()
     ): Long = withContext(Dispatchers.IO) {
         val now = System.currentTimeMillis()
         val stockLengths = defaults.stockLengthsMm.ifEmpty { listOf(12_000) }
+
         dao.insertProject(
             ProjectEntity(
                 name = name,
-                stockLengthMm = stockLengths.max(),
                 kerfMm = defaults.kerfMm,
                 diameterMm = defaults.diameterMm,
                 pricePerKgTomans = defaults.pricePerKgTomans,
@@ -46,29 +48,34 @@ class ProjectRepository(
         )
     }
 
-    suspend fun updateProjectSettings(projectId: Long, settings: ProjectSettings) =
-        withContext(Dispatchers.IO) {
-            require(settings.name.isNotBlank()) { "Project name cannot be blank" }
-            require(settings.kerfMm >= 0) { "kerfMm must be >= 0" }
-            require(settings.diameterMm > 0) { "diameterMm must be > 0" }
-            require(settings.stockLengthsMm.isNotEmpty()) { "At least one stock length required" }
-            require(settings.stockLengthsMm.all { it > 0 }) { "stock lengths must be > 0" }
+    suspend fun updateProjectSettings(
+        projectId: Long,
+        settings: ProjectSettings
+    ) = withContext(Dispatchers.IO) {
+        require(settings.name.isNotBlank()) { "Project name cannot be blank" }
+        require(settings.kerfMm >= 0) { "kerfMm must be >= 0" }
+        require(settings.diameterMm > 0) { "diameterMm must be > 0" }
+        require(settings.stockLengthsMm.isNotEmpty()) { "At least one stock length required" }
+        require(settings.stockLengthsMm.all { it > 0 }) { "stock lengths must be > 0" }
 
-            val project = dao.getProjectById(projectId) ?: return@withContext
-            val sortedStocks = settings.stockLengthsMm.distinct().sortedDescending()
-            dao.updateProject(
-                project.copy(
-                    name = settings.name.trim(),
-                    stockLengthMm = sortedStocks.max(),
-                    kerfMm = settings.kerfMm,
-                    diameterMm = settings.diameterMm,
-                    pricePerKgTomans = settings.pricePerKgTomans,
-                    steelDensityKgM3 = settings.steelDensityKgM3,
-                    stockLengthsMm = sortedStocks,
-                    updatedAtMillis = System.currentTimeMillis()
-                )
+        val project = dao.getProjectById(projectId) ?: return@withContext
+        val sortedStocks = settings.stockLengthsMm.distinct().sortedDescending()
+        val now = System.currentTimeMillis()
+
+        database.withTransaction {
+            val updatedProject = project.copy(
+                name = settings.name.trim(),
+                kerfMm = settings.kerfMm,
+                diameterMm = settings.diameterMm,
+                pricePerKgTomans = settings.pricePerKgTomans,
+                steelDensityKgM3 = settings.steelDensityKgM3,
+                stockLengthsMm = sortedStocks,
+                updatedAtMillis = now
             )
+            dao.updateProject(updatedProject)
+            dao.updateProject(updatedProject.copy(cuttingPlan = null, updatedAtMillis = now))
         }
+    }
 
     suspend fun getProjectSnapshot(projectId: Long): ProjectWithDemands? = withContext(Dispatchers.IO) {
         val project = dao.getProjectById(projectId) ?: return@withContext null
@@ -127,6 +134,7 @@ class ProjectRepository(
     ): CuttingPlan = withContext(Dispatchers.Default) {
         val project = dao.getProjectById(projectId) ?: error("Project not found: $projectId")
         val demands = dao.getDemandsOnce(projectId)
+
         require(demands.isNotEmpty()) { "Project has no demands" }
 
         val grouped = demands
@@ -134,14 +142,17 @@ class ProjectRepository(
             .filter { it.lengthMm > 0 && it.quantity > 0 }
             .groupBy { it.lengthMm }
             .map { (lengthMm, items) ->
-                DemandInput(lengthMm = lengthMm, quantity = items.sumOf { it.quantity })
+                DemandInput(
+                    lengthMm = lengthMm,
+                    quantity = items.sumOf { it.quantity }
+                )
             }
             .sortedByDescending { it.lengthMm }
             .toList()
 
         require(grouped.isNotEmpty()) { "Project has no valid demands" }
 
-        val maxStock = project.stockLengthsMm.maxOrNull() ?: project.stockLengthMm
+        val maxStock = project.stockLengthsMm.maxOrNull() ?: 12_000
         grouped.forEach { demand ->
             require(demand.lengthMm <= maxStock) {
                 "طول ${demand.lengthMm} از بزرگ‌ترین میلگرد (${maxStock}mm) بیشتر است."
@@ -169,12 +180,10 @@ class ProjectRepository(
             dao.updateProject(
                 fresh.copy(
                     cuttingPlan = plan,
-                    stockLengthMm = plan.stockLengthMm,
                     updatedAtMillis = now
                 )
             )
         }
-
         plan
     }
 

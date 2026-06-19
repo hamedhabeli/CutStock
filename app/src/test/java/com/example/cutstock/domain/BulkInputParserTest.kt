@@ -41,4 +41,32 @@ class BulkInputParserTest {
         val parsed = BulkInputParser.parse(formatted).demands
         assertEquals(demands, parsed)
     }
+
+    @Test
+    fun parse_persianDigits_parsedCorrectly() {
+        val rawInput = "۴۰۰۰ ۱۰\n۳۲۰۰ ۵"
+        val result = BulkInputParser.parse(rawInput).demands
+        assertEquals(2, result.size)
+        assertEquals(4000, result[0].lengthMm)
+        assertEquals(10, result[0].quantity)
+        assertEquals(3200, result[1].lengthMm)
+        assertEquals(5, result[1].quantity)
+    }
+
+    @Test
+    fun parse_negativeNumbers_ignored() {
+        val rawInput = "4000 -10\n3200 5\n3000 -2"
+        val result = BulkInputParser.parse(rawInput).demands
+        assertEquals(1, result.size)
+        assertEquals(3200, result[0].lengthMm)
+        assertEquals(5, result[0].quantity)
+    }
+
+    @Test
+    fun parse_ignoredLineCount_isAccurate() {
+        val rawInput = "4000 10\nignoreThisLine\n3000 -5\n2000 5"
+        val result = BulkInputParser.parse(rawInput)
+        assertEquals(2, result.demands.size)
+        assertEquals(2, result.ignoredLines)
+    }
 }

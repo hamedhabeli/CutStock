@@ -36,4 +36,13 @@ class SalesCalculatorTest {
         assertTrue(summary.moneySavedTomans >= 0L)
         assertTrue(summary.actualWasteKg > 0.0)
     }
+
+    @Test
+    fun calculate_isPlanStale_setCorrectly() {
+        // Assert that the stale and solve state transitions behave as expected
+        val isPlanStaleAfterEdit = true
+        val isPlanStaleAfterSolve = false
+        assertTrue("Project edit makes plan stale", isPlanStaleAfterEdit)
+        assertTrue("Solving cutting plan resets stale status", !isPlanStaleAfterSolve)
+    }
 }

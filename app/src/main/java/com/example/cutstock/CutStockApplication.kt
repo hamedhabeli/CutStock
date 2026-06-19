@@ -2,6 +2,7 @@ package com.example.cutstock
 
 import android.app.Application
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.FirebaseApp
 import androidx.room.Room
 import com.example.cutstock.billing.BillingProviderImpl
 import com.example.cutstock.data.AppDatabase
@@ -24,11 +25,12 @@ class CutStockApplication : Application(), AppContainer {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        FirebaseApp.initializeApp(this)
     }
 
     private val database by lazy {
         Room.databaseBuilder(this, AppDatabase::class.java, "cutstock.db")
-            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
             .build()
     }
 

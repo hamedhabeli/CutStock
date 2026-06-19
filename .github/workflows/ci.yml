@@ -17,6 +17,8 @@ jobs:
         with:
           path: ~/.gradle/caches
           key: gradle-${{ hashFiles('**/*.gradle.kts') }}
+      - name: Make Gradlew Executable
+        run: chmod +x gradlew
       - name: Unit Tests
         run: ./gradlew testMockDebugUnitTest
       - name: Build Mock Debug APK

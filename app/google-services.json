@@ -12,6 +12,14 @@
           "package_name": "ir.cutmize.app"
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123456789012:android:abcdef012345678a",
+        "android_client_info": {
+          "package_name": "ir.cutmize.app.mock"
+        }
+      }
     }
   ]
 }

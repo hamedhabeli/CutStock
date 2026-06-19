@@ -5,7 +5,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -15,12 +18,15 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.cutstock.BuildConfig
 import com.example.cutstock.CutStockApplication
 import com.example.cutstock.R
 import com.example.cutstock.data.ProjectSettings
 import com.example.cutstock.databinding.ActivityMainBinding
+import com.example.cutstock.domain.BulkInputParser
 import com.example.cutstock.domain.FreemiumPolicy
 import com.example.cutstock.domain.ProjectBackupManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -38,6 +44,13 @@ class MainActivity : AppCompatActivity() {
     private var upgradeShownForSession = false
 
     private val cuttingPlanAdapter = CuttingPlanAdapter()
+
+    private val demandTableAdapter = DemandTableAdapter { demands ->
+        val formattedText = BulkInputParser.format(demands)
+        if (binding.bulkInputEditText.text?.toString() != formattedText) {
+            binding.bulkInputEditText.setText(formattedText)
+        }
+    }
 
     private val container by lazy { application as CutStockApplication }
 
@@ -65,6 +78,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val excelImportLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val importedText = result.data?.getStringExtra("imported_text")
+            if (!importedText.isNullOrBlank()) {
+                updateDemandsFromText(importedText)
+            }
+        }
+    }
+
+    private val competitorPlanLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val importedText = result.data?.getStringExtra("imported_text")
+            if (!importedText.isNullOrBlank()) {
+                updateDemandsFromText(importedText)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -77,8 +112,46 @@ class MainActivity : AppCompatActivity() {
         binding.cuttingPlanRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.cuttingPlanRecyclerView.adapter = cuttingPlanAdapter
 
+        // CHANGE A: Initialize Demand Table
+        binding.demandTableRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.demandTableRecyclerView.adapter = demandTableAdapter
+
+        binding.addDemandRowFab.setOnClickListener {
+            demandTableAdapter.addRow()
+        }
+
+        // Swipe to Delete
+        val swipeHandler = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean = false
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                demandTableAdapter.removeRow(position)
+            }
+        }
+        ItemTouchHelper(swipeHandler).attachToRecyclerView(binding.demandTableRecyclerView)
+
+        // Collapsible Paste Mode Card
+        var isPasteModeExpanded = false
+        binding.pasteModeHeader.setOnClickListener {
+            isPasteModeExpanded = !isPasteModeExpanded
+            binding.pasteModeCard.isVisible = isPasteModeExpanded
+            binding.pasteModeChevron.setImageResource(
+                if (isPasteModeExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float
+            )
+        }
+
         binding.bulkInputEditText.doAfterTextChanged {
             userEditedBulkInput = binding.bulkInputEditText.isFocused
+            if (userEditedBulkInput) {
+                val raw = it?.toString().orEmpty()
+                val parsed = BulkInputParser.parseDemands(raw)
+                demandTableAdapter.updateData(parsed)
+            }
         }
 
         binding.solveButton.setOnClickListener {
@@ -87,6 +160,31 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.settingsButton.setOnClickListener { showSettingsDialog() }
+
+        // CHANGE E: Import Excel Click
+        binding.importExcelButton.setOnClickListener {
+            val intent = Intent(this, ExcelImportActivity::class.java)
+            excelImportLauncher.launch(intent)
+        }
+
+        // CHANGE F: Competitor Plan Click
+        binding.competitorPlanButton.setOnClickListener {
+            val intent = Intent(this, CompetitorPlanActivity::class.java)
+            val state = viewModel.uiState.value as? ProjectUiState.Success
+            if (state != null) {
+                intent.putExtra("stock_length", state.settings.primaryStockLengthMm)
+                intent.putExtra("kerf", state.settings.kerfMm)
+                intent.putExtra("diameter", state.settings.diameterMm)
+                intent.putExtra("density", state.settings.steelDensityKgM3)
+                intent.putExtra("price", state.settings.pricePerKgTomans)
+            }
+            competitorPlanLauncher.launch(intent)
+        }
+
+        // CHANGE D: Naive Waste Explanation Bottom Sheet Tooltip
+        binding.naiveWasteInfoIcon.setOnClickListener {
+            showNaiveWasteExplanation()
+        }
 
         val projectId = intent.getLongExtra(EXTRA_PROJECT_ID, -1L)
         if (projectId > 0L) {
@@ -107,6 +205,37 @@ class MainActivity : AppCompatActivity() {
                 viewModel.events.collect { handleEvent(it) }
             }
         }
+    }
+
+    private fun updateDemandsFromText(text: String) {
+        userEditedBulkInput = false
+        binding.bulkInputEditText.setText(text)
+        val parsed = BulkInputParser.parseDemands(text)
+        demandTableAdapter.updateData(parsed)
+    }
+
+    private fun showNaiveWasteExplanation() {
+        val dialog = BottomSheetDialog(this)
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 48, 48, 48)
+        }
+        val titleView = TextView(this).apply {
+            text = "روش معمول کارگاه چیست؟"
+            textSize = 18f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, 0, 0, 16)
+            textDirection = View.TEXT_DIRECTION_LOCALE
+        }
+        val descView = TextView(this).apply {
+            text = com.example.cutstock.domain.NAIVE_METHOD_EXPLANATION
+            textSize = 15f
+            textDirection = View.TEXT_DIRECTION_LOCALE
+        }
+        container.addView(titleView)
+        container.addView(descView)
+        dialog.setContentView(container)
+        dialog.show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -181,8 +310,13 @@ class MainActivity : AppCompatActivity() {
                 binding.toolbar.title = state.projectName
                 binding.projectTitleTextView.text = state.projectName
 
+                // CHANGE C: Stale warning banner
+                binding.staleWarningBanner.isVisible = state.isPlanStale
+
                 if (!userEditedBulkInput && binding.bulkInputEditText.text?.toString() != state.bulkInputText) {
                     binding.bulkInputEditText.setText(state.bulkInputText)
+                    val parsed = BulkInputParser.parseDemands(state.bulkInputText)
+                    demandTableAdapter.updateData(parsed)
                 }
 
                 val sales = state.sales
@@ -232,11 +366,7 @@ class MainActivity : AppCompatActivity() {
                 if (plan != null && plan.bins.isNotEmpty()) {
                     binding.emptyPlanTextView.isVisible = false
                     binding.cuttingPlanRecyclerView.isVisible = true
-                    cuttingPlanAdapter.submitList(
-                        plan.bins.mapIndexed { index, bin ->
-                            CuttingBinItem(index = index + 1, stockLengthMm = bin.stockLengthMm, bin = bin)
-                        }
-                    )
+                    cuttingPlanAdapter.submitList(plan.bins)
                 } else {
                     binding.emptyPlanTextView.isVisible = true
                     binding.cuttingPlanRecyclerView.isVisible = false

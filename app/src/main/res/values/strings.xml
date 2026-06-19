@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">کات‌استاک</string>
+    <string name="app_name">کات‌میز</string>
 
     <string name="projects_title">پروژه‌ها</string>
     <string name="new_project">پروژه جدید</string>
@@ -40,7 +40,7 @@
     <string name="bars_needed_label">میلگرد موردنیاز</string>
     <string name="waste_percent_label">درصد ضایعات</string>
     <string name="money_saved_label">صرفه‌جویی تخمینی</string>
-    <string name="naive_waste_label">ضایعات روش ساده</string>
+    <string name="naive_waste_label">ضایعات روش معمول کارگاه</string>
     <string name="actual_waste_label">ضایعات بهینه</string>
     <string name="saved_waste_label">صرفه‌جویی وزن</string>
     <string name="no_plan_yet">هنوز برنامه‌ای محاسبه نشده است.</string>
@@ -80,4 +80,30 @@
     <string name="delete">حذف</string>
     <string name="debug_pro_toggle">فعال‌سازی نسخه حرفه‌ای (فقط دیباگ)</string>
     <string name="settings_invalid">نام پروژه یا طول‌های stock نامعتبر است.</string>
+
+    <!-- Structured Table Editor & New UI Strings -->
+    <string name="stale_plan_warning">⚠️ تنظیمات تغییر کرده است — نتیجه قدیمی نمایش داده می‌شود. «حل برش» را دوباره اجرا کنید.</string>
+    <string name="menu_import_excel">وارد کردن از اکسل</string>
+    <string name="excel_import_title">وارد کردن از اکسل</string>
+    <string name="excel_select_length_col">کدام ستون طول است؟</string>
+    <string name="excel_select_quantity_col">کدام ستون تعداد است؟</string>
+    <string name="excel_start_row">از کدام ردیف شروع شود؟</string>
+    <string name="excel_preview_title">پیش‌نمایش ۵ ردیف اول:</string>
+    <string name="excel_confirm_import">تأیید و وارد کردن</string>
+    <string name="excel_error_select_file">خطا در انتخاب فایل</string>
+    <string name="excel_error_parse">خطا در خواندن فایل اکسل</string>
+    <string name="menu_competitor_plan">بهبود برنامه برش رقیب</string>
+    <string name="competitor_plan_title">بهبود برنامه برش رقیب</string>
+    <string name="competitor_input_hint">هر خط یک شاخه با قطعات آن به صورت جمع:\n6000 + 5500\n4000 + 4000 + 3000</string>
+    <string name="competitor_input_label">برنامه برش رقیب (طول قطعات با علامت +)</string>
+    <string name="competitor_compare_label">برنامه رقیب: %1$s٪ ضایعات | کات‌میز: %2$s٪ ضایعات</string>
+    <string name="competitor_saving_label">صرفه‌جویی: %1$s</string>
+    <string name="competitor_cta">ببینید کات‌میز چطور این پروژه را بهتر برش می‌زند</string>
+    <string name="competitor_invalid_input">ورودی نامعتبر است.</string>
+    <string name="competitor_bar">شاخه</string>
+    <string name="table_mode_label">جدول تقاضا</string>
+    <string name="paste_mode_label">باکس چسباندن متن (Paste)</string>
+    <string name="add_row">افزودن ردیف</string>
+    <string name="column_length">طول (mm)</string>
+    <string name="column_quantity">تعداد</string>
 </resources>

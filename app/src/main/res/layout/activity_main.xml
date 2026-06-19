@@ -30,10 +30,32 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- CHANGE C: Stale Plan Warning Banner -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/staleWarningBanner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="#FFE0B2"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:text="@string/stale_plan_warning"
+                    android:textColor="#E65100"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- CHANGE A: Structured Table Editor -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/bulk_input_label"
+                android:text="@string/table_mode_label"
                 android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
 
             <com.google.android.material.card.MaterialCardView
@@ -43,19 +65,91 @@
                 app:cardElevation="4dp"
                 app:cardUseCompatPadding="true">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/column_length"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/column_quantity"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/demandTableRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        tools:listitem="@android:layout/simple_list_item_1" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- CHANGE A: Paste mode (Collapsible Section) -->
+            <LinearLayout
+                android:id="@+id/pasteModeHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/paste_mode_label"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+
+                <ImageView
+                    android:id="@+id/pasteModeChevron"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/arrow_down_float" />
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/pasteModeCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:visibility="gone"
+                app:cardElevation="2dp">
+
                 <EditText
                     android:id="@+id/bulkInputEditText"
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
+                    android:layout_height="120dp"
                     android:background="@android:color/transparent"
                     android:fontFamily="monospace"
                     android:gravity="top|start"
                     android:hint="@string/bulk_input_hint"
                     android:inputType="textMultiLine"
-                    android:padding="16dp"
+                    android:padding="12dp"
                     android:textDirection="locale" />
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Tools & Actions Button Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -76,6 +170,32 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/settings" />
+            </LinearLayout>
+
+            <!-- CHANGE E & F: Excel and Competitor plan utilities -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/importExcelButton"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:text="@string/menu_import_excel" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/competitorPlanButton"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:text="@string/menu_competitor_plan" />
             </LinearLayout>
 
             <ProgressBar
@@ -168,23 +288,46 @@
                         android:textStyle="bold"
                         tools:text="1,250,000 تومان" />
 
-                    <TextView
-                        android:id="@+id/naiveWasteTextView"
+                    <!-- CHANGE D: Naive Waste Explanation Tooltip -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        tools:text="naive" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/naiveWasteTextView"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            tools:text="ضایعات روش معمول کارگاه: 12.5 kg" />
+
+                        <ImageView
+                            android:id="@+id/naiveWasteInfoIcon"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginStart="8dp"
+                            android:background="?android:attr/selectableItemBackgroundBorderless"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:contentDescription="توضیحات ضایعات"
+                            android:src="@android:drawable/ic_dialog_info"
+                            app:tint="?attr/colorPrimary" />
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/actualWasteTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         tools:text="actual" />
 
                     <TextView
                         android:id="@+id/savedWasteTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         tools:text="saved" />
 
                     <TextView
@@ -274,4 +417,16 @@
                 android:visibility="gone" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- FAB for adding demand row -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addDemandRowFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        app:srcCompat="@android:drawable/ic_input_add"
+        app:tint="@android:color/white"
+        android:contentDescription="@string/add_row" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

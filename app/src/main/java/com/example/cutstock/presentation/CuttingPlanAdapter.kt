@@ -2,7 +2,10 @@ package com.example.cutstock.presentation
 
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -11,7 +14,90 @@ import com.example.cutstock.databinding.ItemCuttingBinBinding
 import com.example.cutstock.nativecore.Bin
 import kotlin.math.max
 
-class CuttingPlanAdapter : ListAdapter<CuttingBinItem, CuttingPlanAdapter.ViewHolder>(DiffCallback) {
+data class GroupedBinItem(
+    val patternIndex: Int,        // 1-based display number
+    val pieces: IntArray,          // sorted piece lengths
+    val stockLengthMm: Int,
+    val usedMm: Int,
+    val wasteMm: Int,
+    val repeatCount: Int,           // how many bars have this exact pattern
+    val originalIndices: List<Int>  // original 1-based indices of matching bars
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as GroupedBinItem
+        return patternIndex == other.patternIndex &&
+            pieces.contentEquals(other.pieces) &&
+            stockLengthMm == other.stockLengthMm &&
+            usedMm == other.usedMm &&
+            wasteMm == other.wasteMm &&
+            repeatCount == other.repeatCount &&
+            originalIndices == other.originalIndices
+    }
+
+    override fun hashCode(): Int {
+        var result = patternIndex
+        result = 31 * result + pieces.contentHashCode()
+        result = 31 * result + stockLengthMm
+        result = 31 * result + usedMm
+        result = 31 * result + wasteMm
+        result = 31 * result + repeatCount
+        result = 31 * result + originalIndices.hashCode()
+        return result
+    }
+}
+
+class CuttingPlanAdapter : ListAdapter<Bin, CuttingPlanAdapter.ViewHolder>(DiffCallback) {
+
+    private var groupedItems: List<GroupedBinItem> = emptyList()
+    private val expandedPatterns = mutableSetOf<Int>()
+
+    override fun submitList(list: List<Bin>?) {
+        if (list == null) {
+            groupedItems = emptyList()
+            super.submitList(emptyList())
+            return
+        }
+        groupedItems = groupBins(list)
+        super.submitList(list)
+    }
+
+    override fun getItemCount(): Int = groupedItems.size
+
+    private fun getGroupedItem(position: Int): GroupedBinItem = groupedItems[position]
+
+    private fun groupBins(bins: List<Bin>): List<GroupedBinItem> {
+        val groups = mutableListOf<MutableList<Pair<Int, Bin>>>()
+        bins.forEachIndexed { index, bin ->
+            val sortedPieces = bin.lengthsMm.sorted()
+            val group = groups.find { g ->
+                val firstBin = g.first().second
+                firstBin.stockLengthMm == bin.stockLengthMm &&
+                    firstBin.usedMm == bin.usedMm &&
+                    firstBin.wasteMm == bin.wasteMm &&
+                    firstBin.lengthsMm.sorted() == sortedPieces
+            }
+            if (group != null) {
+                group.add((index + 1) to bin)
+            } else {
+                groups.add(mutableListOf((index + 1) to bin))
+            }
+        }
+
+        return groups.mapIndexed { i, group ->
+            val firstBin = group.first().second
+            GroupedBinItem(
+                patternIndex = i + 1,
+                pieces = firstBin.lengthsMm.sorted().toIntArray(),
+                stockLengthMm = firstBin.stockLengthMm,
+                usedMm = firstBin.usedMm,
+                wasteMm = firstBin.wasteMm,
+                repeatCount = group.size,
+                originalIndices = group.map { it.first }
+            )
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemCuttingBinBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -19,29 +105,36 @@ class CuttingPlanAdapter : ListAdapter<CuttingBinItem, CuttingPlanAdapter.ViewHo
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getGroupedItem(position))
     }
 
-    class ViewHolder(
+    inner class ViewHolder(
         private val binding: ItemCuttingBinBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: CuttingBinItem) {
-            binding.binTitleTextView.text = binding.root.context.getString(
-                com.example.cutstock.R.string.bin_title_format,
-                item.index
-            )
-            binding.binMetaTextView.text = binding.root.context.getString(
-                com.example.cutstock.R.string.bin_meta_format,
-                item.bin.stockLengthMm,
-                item.bin.usedMm,
-                item.bin.wasteMm
-            )
-            binding.binPiecesTextView.text = item.bin.lengthsMm.joinToString(" + ")
+        init {
+            binding.root.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val patternIndex = getGroupedItem(position).patternIndex
+                    if (expandedPatterns.contains(patternIndex)) {
+                        expandedPatterns.remove(patternIndex)
+                    } else {
+                        expandedPatterns.add(patternIndex)
+                    }
+                    notifyItemChanged(position)
+                }
+            }
+        }
+
+        fun bind(item: GroupedBinItem) {
+            binding.binTitleTextView.text = "الگو ${item.patternIndex} — ×${item.repeatCount} میلگرد"
+            binding.binMetaTextView.text = "طول ${item.stockLengthMm} mm | استفاده: ${item.usedMm} | ضایعات: ${item.wasteMm} mm"
+            binding.binPiecesTextView.text = item.pieces.joinToString(" + ")
 
             binding.barContainer.removeAllViews()
-            val stockLength = max(item.bin.stockLengthMm.coerceAtLeast(1), 1)
-            item.bin.lengthsMm.forEachIndexed { index, lengthMm ->
+            val stockLength = max(item.stockLengthMm.coerceAtLeast(1), 1)
+            item.pieces.forEachIndexed { index, lengthMm ->
                 val segment = android.view.View(binding.root.context).apply {
                     layoutParams = android.widget.LinearLayout.LayoutParams(
                         0,
@@ -53,7 +146,7 @@ class CuttingPlanAdapter : ListAdapter<CuttingBinItem, CuttingPlanAdapter.ViewHo
                 binding.barContainer.addView(segment)
             }
 
-            val wasteMm = item.bin.wasteMm
+            val wasteMm = item.wasteMm
             if (wasteMm > 0) {
                 val waste = android.view.View(binding.root.context).apply {
                     layoutParams = android.widget.LinearLayout.LayoutParams(
@@ -67,6 +160,31 @@ class CuttingPlanAdapter : ListAdapter<CuttingBinItem, CuttingPlanAdapter.ViewHo
             }
 
             binding.emptyPlanTextView.isVisible = false
+
+            // Programmatic Expandable Details View
+            val innerLayout = binding.root.getChildAt(0) as ViewGroup
+            var detailsView = binding.root.findViewWithTag<TextView>("details_view_tag")
+            if (detailsView == null) {
+                detailsView = TextView(binding.root.context).apply {
+                    tag = "details_view_tag"
+                    layoutParams = LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        topMargin = 16
+                    }
+                    textSize = 13f
+                    setTextColor(Color.parseColor("#757575"))
+                    textDirection = View.TEXT_DIRECTION_LOCALE
+                }
+                innerLayout.addView(detailsView)
+            }
+
+            val isExpanded = expandedPatterns.contains(item.patternIndex)
+            detailsView.isVisible = isExpanded
+            if (isExpanded) {
+                detailsView.text = "جزئیات شاخه‌ها: " + item.originalIndices.map { "شاخه $it" }.joinToString("، ")
+            }
         }
     }
 
@@ -80,18 +198,12 @@ class CuttingPlanAdapter : ListAdapter<CuttingBinItem, CuttingPlanAdapter.ViewHo
             Color.parseColor("#00796B")
         )
 
-        private val DiffCallback = object : DiffUtil.ItemCallback<CuttingBinItem>() {
-            override fun areItemsTheSame(oldItem: CuttingBinItem, newItem: CuttingBinItem): Boolean =
-                oldItem.index == newItem.index
+        private val DiffCallback = object : DiffUtil.ItemCallback<Bin>() {
+            override fun areItemsTheSame(oldItem: Bin, newItem: Bin): Boolean =
+                oldItem == newItem
 
-            override fun areContentsTheSame(oldItem: CuttingBinItem, newItem: CuttingBinItem): Boolean =
+            override fun areContentsTheSame(oldItem: Bin, newItem: Bin): Boolean =
                 oldItem == newItem
         }
     }
 }
-
-data class CuttingBinItem(
-    val index: Int,
-    val stockLengthMm: Int,
-    val bin: Bin
-)

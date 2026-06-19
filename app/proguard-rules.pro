@@ -31,3 +31,9 @@
 -dontwarn java.awt.**
 -dontwarn org.w3c.dom.**
 -dontwarn org.xml.sax.**
+
+# Ignore warnings for missing optional dependencies of POI/XMLBeans (e.g. XMLBeans, Saxon, OSGi, Log4j)
+-dontwarn aQute.bnd.annotation.spi.**
+-dontwarn net.sf.saxon.**
+-dontwarn org.osgi.framework.**
+-dontwarn org.apache.logging.log4j.**

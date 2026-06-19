@@ -37,3 +37,5 @@
 -dontwarn net.sf.saxon.**
 -dontwarn org.osgi.framework.**
 -dontwarn org.apache.logging.log4j.**
+
+# Trigger clean retry of build pipeline to resolve transient kapt timeout issues

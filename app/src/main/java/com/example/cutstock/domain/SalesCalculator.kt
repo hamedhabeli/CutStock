@@ -26,7 +26,7 @@ object SalesCalculator {
     ): SalesSummary {
         val barsNeeded = plan.binCount.coerceAtLeast(0)
         val wastePercent = plan.wastePercentBasisPoints / 100.0
-        val primaryStock = project.stockLengthsMm.maxOrNull() ?: project.stockLengthMm
+        val primaryStock = project.stockLengthsMm.maxOrNull() ?: 12_000
 
         val naiveWasteMm = NaiveCuttingEstimator.estimateTotalWasteMm(
             demands = demands,

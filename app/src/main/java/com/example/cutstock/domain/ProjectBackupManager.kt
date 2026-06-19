@@ -34,7 +34,7 @@ class ProjectBackupManager(
         val project = snapshot.project
         val backup = ProjectBackup(
             name = project.name,
-            stockLengthMm = project.stockLengthMm,
+            stockLengthMm = project.stockLengthsMm.maxOrNull() ?: 12_000,
             kerfMm = project.kerfMm,
             diameterMm = project.diameterMm,
             pricePerKgTomans = project.pricePerKgTomans,
